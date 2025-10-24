@@ -57,6 +57,9 @@
 		<define name="DISCORD_RPC" if="desktop"/>
 	</section>
 
+	<!-- ern what the lua -->
+	<define name="LUA_ALLOWED" if="desktop" />
+
 	<!-- Uncomment this to achive faster compile times, will strip extraneous and commonly unused features. -->
 	<!-- <define name="STRIPPED_COMPILE" unless="debug"/> -->
 
@@ -135,6 +138,9 @@
 
 	<haxelib name="hscript-improved" />
 	<haxelib name="hxdiscord_rpc" if="DISCORD_RPC"/>
+
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	
 	<haxelib name="markdown" />
 	<haxelib name="hxcpp-debug-server" if="TEST_BUILD debug" />
 
