@@ -30,6 +30,11 @@ import funkin.menus.ui.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 
+#if LUA_ALLOWED
+import llua.*;
+import llua.Lua;
+#end
+  
 using StringTools;
 using funkin.backend.utils.CoolUtil;
 #end
