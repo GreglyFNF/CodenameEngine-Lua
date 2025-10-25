@@ -12,7 +12,9 @@
 		<git name="flixel" url="https://github.com/CodenameCrew/cne-flixel" />
 		<git name="flixel-addons" url="https://github.com/CodenameCrew/cne-flixel-addons" />
 
-		<!-- Other Libraries -->
+		<git name="linc_luajit" url="https://github.com/superpowers04/linc_luajit 1906c4a96f6bb6df66562b3f24c62f4c5bba14a7" />
+
+        <!-- Other Libraries -->
 		<git name="hscript-improved" url="https://github.com/CodenameCrew/hscript-improved" ref="codename-dev" />
 		<git name="flxanimate" url="https://github.com/CodenameCrew/cne-flxanimate" />
 		<git name="hxdiscord_rpc" url="https://github.com/CodenameCrew/cne-hxdiscord_rpc" skipDeps="true" />
