@@ -117,6 +117,8 @@ class Main extends Sprite
 
 		hscript.Interp.importRedirects = funkin.backend.scripting.Script.getDefaultImportRedirects();
 
+		//#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.backend.scripting.CodenameLua.CallbackHandler.call)); #end
+
 		#if GLOBAL_SCRIPT
 		funkin.backend.scripting.GlobalScript.init();
 		#end

@@ -36,6 +36,16 @@ import funkin.backend.week.WeekData;
 import funkin.savedata.FunkinSave;
 import haxe.io.Path;
 
+#if LUA_ALLOWED
+import funkin.backend.scripting.lua.*;
+import funkin.backend.scripting.CodenameLua;
+#else
+import funkin.backend.scripting.lua.LuaUtils;
+#end
+
+import funkin.backend.scripting.lua.ModchartSprite;
+import flixel.util.FlxSave;
+
 using StringTools;
 
 @:access(flixel.text.FlxText.FlxTextFormatRange)
@@ -45,8 +55,14 @@ class PlayState extends MusicBeatState
 	/**
 	 * Current PlayState instance.
 	 */
-	public static var instance:PlayState = null;
+	// Lua shit
+	public static var instance:PlayState;
+	#if LUA_ALLOWED public var luaArray:Array<CodenameLua> = []; #end
 
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	private var luaDebugGroup:FlxTypedGroup<funkin.backend.scripting.lua.DebugLuaText>;
+	#end
+	
 	/**
 	 * SONG DATA (Chart, Metadata).
 	 */
@@ -647,6 +663,57 @@ class PlayState extends MusicBeatState
 		});
 	}
 
+	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
+		#if LUA_ALLOWED
+		if(args == null) args = [];
+		if(exclusions == null) exclusions = [];
+		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
+
+		var arr:Array<CodenameLua> = [];
+		for (script in luaArray)
+		{
+			if(script.closed)
+			{
+				arr.push(script);
+				continue;
+			}
+
+			if(exclusions.contains(script.path))
+				continue;
+
+			var myValue:Dynamic = script.call(funcToCall, args);
+			if((myValue == LuaUtils.Function_StopLua || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+			{
+				returnVal = myValue;
+				break;
+			}
+
+			if(myValue != null && !excludeValues.contains(myValue))
+				returnVal = myValue;
+
+			if(script.closed) arr.push(script);
+		}
+
+		if(arr.length > 0)
+			for (script in arr)
+				luaArray.remove(script);
+		#end
+		return returnVal;
+	}
+
+	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		#if LUA_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in luaArray) {
+			if(exclusions.contains(script.path))
+				continue;
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+
 	public inline function gameAndCharsCall(func:String, ?parameters:Array<Dynamic>, ?charsFunc:String) {
 		scripts.call(func, parameters);
 		callOnCharacters(charsFunc != null ? charsFunc : func, parameters);
@@ -657,6 +724,25 @@ class PlayState extends MusicBeatState
 		callOnCharacters(charsFunc != null ? charsFunc : func, [event]);
 		return event;
 	}
+
+	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public static function getVariables()
+		return getState().variables;
+
+
+	public static function getState():PlayState {
+		return cast (FlxG.state, PlayState);
+	}
+	
+	#if LUA_ALLOWED
+	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
+	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
+	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
+	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
+	public var modchartTexts:Map<String, FlxText> = new Map<String, FlxText>();
+	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
+	#end
 
 	@:dox(hide) override public function create()
 	{
@@ -729,6 +815,7 @@ class PlayState extends MusicBeatState
 								Logs.warn('data/charts/ is deprecated and will be removed in the future. Please move script $file to songs/', DARKYELLOW, "PlayState");
 
 							addScript(file);
+							trace(file);
 						}
 					}
 
@@ -1093,6 +1180,15 @@ class PlayState extends MusicBeatState
 			stage.destroySilently();
 			remove(stage, true);
 		}
+
+		#if LUA_ALLOWED
+		for (lua in luaArray)
+		{
+			lua.call('onDestroy', []);
+		}
+		luaArray = null;
+		CodenameLua.customFunctions.clear();
+		#end
 
 		scripts = FlxDestroyUtil.destroy(scripts);
 
@@ -2251,6 +2347,32 @@ class PlayState extends MusicBeatState
 
 		SONG = Chart.parse(_name, _difficulty, _variation);
 		fromMods = SONG.fromMods;
+	}
+
+
+	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
+		#if LUA_ALLOWED
+		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
+		if(variables.exists(tag)) return variables.get(tag);
+		#end
+		return null;
+	}
+	
+	public function addTextToDebug(text:String, color:FlxColor) {
+		var newText:funkin.backend.scripting.lua.DebugLuaText = luaDebugGroup.recycle(funkin.backend.scripting.lua.DebugLuaText);
+		newText.text = text;
+		newText.color = color;
+		newText.disableTime = 6;
+		newText.alpha = 1;
+		newText.setPosition(10, 8 - newText.height);
+
+		luaDebugGroup.forEachAlive(function(spr:funkin.backend.scripting.lua.DebugLuaText) {
+			spr.y += newText.height + 2;
+		});
+		luaDebugGroup.add(newText);
+
+		Sys.println(text);
 	}
 }
 

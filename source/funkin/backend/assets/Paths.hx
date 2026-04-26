@@ -9,6 +9,7 @@ import haxe.io.Path;
 import lime.utils.AssetLibrary;
 import openfl.utils.Assets as OpenFlAssets;
 import animate.FlxAnimateFrames;
+import lime.utils.Assets;
 
 using StringTools;
 

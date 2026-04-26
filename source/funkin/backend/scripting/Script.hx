@@ -105,6 +105,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 			"ThreadUtil"		=> funkin.backend.utils.ThreadUtil,
 			"MemoryUtil"		=> funkin.backend.utils.MemoryUtil,
 			"BitmapUtil"		=> funkin.backend.utils.BitmapUtil,
+			#if LUA_ALLOWED "CodenameLua"		=> funkin.backend.scripting.CodenameLua, #end
 
 			#if TRANSLATIONS_SUPPORT
 			"TranslationUtil"	=> funkin.backend.utils.TranslationUtil,
@@ -177,7 +178,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	public static var scriptExtensions:Array<String> = [
 		"hx", "hscript", "hsc", "hxs",
 		"pack", // combined file
-		"lua" /** ACTUALLY NOT SUPPORTED, ONLY FOR THE MESSAGE **/
+		"lua" /** greggs fnf here **/
 	];
 
 	/**
@@ -223,8 +224,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 					var arr = Assets.getText(path).split("________PACKSEP________");
 					fromString(arr[1], arr[0]);
 				case "lua":
-					Logs.error("Lua is not supported in this engine. Use HScript instead.");
-					new DummyScript(path);
+					new CodenameLua(path);
 				default:
 					new DummyScript(path);
 			}
@@ -242,8 +242,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 			case "hx" | "hscript" | "hsc" | "hxs":
 				new HScript(path).loadFromString(code);
 			case "lua":
-				Logs.error("Lua is not supported in this engine. Use HScript instead.");
-				new DummyScript(path).loadFromString(code);
+				new CodenameLua(path).loadFromString(code);
 			default:
 				new DummyScript(path).loadFromString(code);
 		}
