@@ -274,29 +274,22 @@ class LuaUtils
 
 	public static inline function getLowestCharacterGroup():FlxSpriteGroup
 	{
-		/*
-		var group:FlxSpriteGroup = PlayState.instance.gfGroup;
+		var group:FlxSpriteGroup = PlayState.instance.characterGroup;
+
 		var pos:Int = PlayState.instance.members.indexOf(group);
 
-		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.characterGroup);
 		if(newPos < pos)
 		{
-			group = PlayState.instance.boyfriendGroup;
+			group = PlayState.instance.characterGroup;
 			pos = newPos;
 		}
-		
-		newPos = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
-		if(newPos < pos)
-		{
-			group = PlayState.instance.dadGroup;
-			pos = newPos;
-		} */
-		return null;
+		return group;
 	}
 	
-	public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Int = 24, loop:Bool = false)
+	public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Float = 24, loop:Bool = false)
 	{
-		var obj:Dynamic = LuaUtils.getObjectDirectly(obj, false);
+		var obj:FlxSprite = cast LuaUtils.getObjectDirectly(obj);
 		if(obj != null && obj.animation != null)
 		{
 			if(indices == null)
@@ -311,11 +304,14 @@ class LuaUtils
 				indices = myIndices;
 			}
 
-			obj.animation.addByIndices(name, prefix, indices, '', framerate, loop);
+			if(prefix != null) obj.animation.addByIndices(name, prefix, indices, '', framerate, loop);
+			else obj.animation.add(name, indices, framerate, loop);
+
 			if(obj.animation.curAnim == null)
 			{
-				if(obj.playAnim != null) obj.playAnim(name, true);
-				else obj.animation.play(name, true);
+				var dyn:Dynamic = cast obj;
+				if(dyn.playAnim != null) dyn.playAnim(name, true);
+				else dyn.animation.play(name, true);
 			}
 			return true;
 		}
@@ -324,7 +320,7 @@ class LuaUtils
 	
 	public static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
 	{
-		switch(spriteType.toLowerCase().trim())
+		switch(spriteType.toLowerCase().replace(' ', ''))
 		{
 			//case "texture" | "textureatlas" | "tex":
 				//spr.frames = AtlasFrameMaker.construct(image);
@@ -332,12 +328,29 @@ class LuaUtils
 			//case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
 				//spr.frames = AtlasFrameMaker.construct(image, null, true);
 
-			case "packer" | "packeratlas" | "pac":
+			case 'aseprite', 'ase', 'json', 'jsoni8':
+				spr.frames = Paths.getAsepriteAtlas(image);
+
+			case "packer", 'packeratlas', 'pac':
 				spr.frames = Paths.getPackerAtlas(image);
+
+			case 'sparrow', 'sparrowatlas', 'sparrowv2':
+				spr.frames = Paths.getSparrowAtlas(image);
 
 			default:
 				spr.frames = Paths.getSparrowAtlas(image);
 		}
+	}
+
+	public static function destroyObject(tag:String) {
+		var variables = MusicBeatState.getVariables();
+		var obj:FlxSprite = variables.get(tag);
+		if(obj == null || obj.destroy == null)
+			return;
+
+		LuaUtils.getTargetInstance().remove(obj, true);
+		obj.destroy();
+		variables.remove(tag);
 	}
 
 	public static function resetTextTag(tag:String) {
@@ -396,6 +409,9 @@ class LuaUtils
 		}
 		#end
 	}
+
+	public static function formatVariable(tag:String)
+		return tag.trim().replace(' ', '_').replace('.', '');
 
 	public static function getBuildTarget():String
 	{

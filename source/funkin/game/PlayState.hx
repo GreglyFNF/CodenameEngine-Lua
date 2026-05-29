@@ -36,6 +36,8 @@ import funkin.backend.week.WeekData;
 import funkin.savedata.FunkinSave;
 import haxe.io.Path;
 
+import flixel.group.FlxSpriteGroup;
+
 #if LUA_ALLOWED
 import funkin.backend.scripting.lua.*;
 import funkin.backend.scripting.CodenameLua;
@@ -724,16 +726,6 @@ class PlayState extends MusicBeatState
 		callOnCharacters(charsFunc != null ? charsFunc : func, [event]);
 		return event;
 	}
-
-	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
-
-	public static function getVariables()
-		return getState().variables;
-
-
-	public static function getState():PlayState {
-		return cast (FlxG.state, PlayState);
-	}
 	
 	#if LUA_ALLOWED
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
@@ -744,6 +736,7 @@ class PlayState extends MusicBeatState
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	#end
 
+	public var characterGroup:FlxSpriteGroup;
 	@:dox(hide) override public function create()
 	{
 		Note.__customNoteTypeExists = [];
@@ -861,6 +854,9 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		characterGroup = new FlxSpriteGroup(); //JUST FOR LUA SPRITES TO BE BELOW CHARACTERS :japanese_ogre:
+		add(characterGroup);
 
 		for(i=>strumLine in SONG.strumLines) {
 			if (strumLine == null) continue;

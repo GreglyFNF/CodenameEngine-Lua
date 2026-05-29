@@ -47,7 +47,7 @@ class CustomSubstate extends MusicBeatSubstate
 	{
 		if(instance != null)
 		{
-			var tagObject:FlxObject = cast (PlayState.getVariables().get(tag), FlxObject);
+			var tagObject:FlxObject = cast (MusicBeatState.getVariables().get(tag), FlxObject);
 
 			if(tagObject != null)
 			{

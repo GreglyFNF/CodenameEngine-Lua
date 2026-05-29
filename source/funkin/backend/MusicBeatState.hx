@@ -108,6 +108,15 @@ class MusicBeatState extends FlxState implements IBeatCancellableReceiver
 
 	public static var ALLOW_DEV_RELOAD:Bool = true;
 
+	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public static function getVariables()
+		return getState().variables;
+
+	public static function getState():MusicBeatState {
+		return cast (FlxG.state, MusicBeatState);
+	}
+
 	inline function get_controls():Controls
 		return PlayerSettings.solo.controls;
 	inline function get_controlsP1():Controls
