@@ -216,7 +216,7 @@ class AssetsLibraryList extends AssetLibrary {
 		Logs.infos("Used cne test / cne build. Switching into source assets.");
 		switchToSourceAssets();
 		#elseif USE_ADAPTED_ASSETS
-		if (sys.FileSystem.exists('./${Main.pathBack}assets/')) {
+		if (sys.FileSystem.exists('./${Main.pathBack}assets/') && !sys.FileSystem.exists('./assets/')) {
 			Logs.infos("Source assets detected. Switching into source assets.");
 			switchToSourceAssets();
 		}
