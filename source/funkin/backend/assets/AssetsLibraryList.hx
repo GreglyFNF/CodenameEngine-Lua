@@ -13,6 +13,8 @@ class AssetsLibraryList extends AssetLibrary {
 	function get_cleanLibraries():Array<AssetLibrary> {
 		return [for (l in libraries) getCleanLibrary(l)];
 	}
+
+	public var rootDirectory:String = "./assets";
 	
 	// is true if any library in `libraries` contains some kind of compressed library. 
 	public var hasCompressedLibrary(get, never):Bool;
@@ -30,8 +32,8 @@ class AssetsLibraryList extends AssetLibrary {
 	public var transLib:TranslatedAssetLibrary;
 	#end
 
-	private var cacheLibraryTypePaths:Map<String, Map<String, AssetLibrary>> = [];
-	private var cacheTimeTypePaths:Map<String, Map<String, Float>> = [];
+	private var cacheLibraryTypePaths:Map<Null<String>, Map<String, AssetLibrary>> = [];
+	private var cacheTimeTypePaths:Map<Null<String>, Map<String, Float>> = [];
 
 	public function removeLibrary(lib:AssetLibrary) {
 		if (lib != null) {
@@ -68,8 +70,8 @@ class AssetsLibraryList extends AssetLibrary {
 			cacheTimeTypePaths.set(type, cacheTimePaths = []);
 		}
 
-		var cacheSafetime:Null<Float> = cacheTimePaths.get(id) + 6;
-		if (cacheSafetime != null) {
+		if (cacheTimePaths.exists(id)) {
+			final cacheSafetime = cacheTimePaths.get(id) + 6;
 			if (cacheLibraryPaths.exists(id)) {
 				if (sec < cacheSafetime) return true;
 				else if (cacheLibraryPaths.get(id).exists(id, type)) {
@@ -220,10 +222,9 @@ class AssetsLibraryList extends AssetLibrary {
 			Logs.infos("Source assets detected. Switching into source assets.");
 			switchToSourceAssets();
 		}
-		else {
-			__defaultLibraries.push(ModsFolder.loadLibraryFromFolder('assets', './assets/', true, SOURCE));
-		}
 		#end
+
+		__defaultLibraries.push(ModsFolder.loadLibraryFromFolder('assets', rootDirectory, true, SOURCE));
 
 		#end
 
@@ -237,7 +238,7 @@ class AssetsLibraryList extends AssetLibrary {
 		ModsFolder.addonsPath = './${Main.pathBack}addons/';
 		#end
 
-		__defaultLibraries.push(ModsFolder.loadLibraryFromFolder('assets', './${Main.pathBack}assets/', true, SOURCE));
+		rootDirectory = './${Main.pathBack}assets/';
 	}
 	#end
 
