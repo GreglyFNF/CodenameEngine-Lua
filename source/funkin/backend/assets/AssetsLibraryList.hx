@@ -4,6 +4,7 @@ package funkin.backend.assets;
 import funkin.backend.assets.TranslatedAssetLibrary;
 #end
 import funkin.backend.assets.IModsAssetLibrary;
+import funkin.backend.assets.AssetSource;
 import lime.utils.AssetLibrary;
 import haxe.ds.Map;
 
@@ -79,8 +80,7 @@ class AssetsLibraryList extends AssetLibrary {
 			final cacheSafeTime = cacheTimePaths.get(id) + 6, library = cacheLibraryPaths.get(id);
 			if (library != null) {
 				if (time < cacheSafeTime) return true;
-				else if (shouldSkipLib(library, source)) {/*do nothing*/}
-				else if (library.exists(id, type)) {
+				else if (!shouldSkipLib(library, source) && library.exists(id, type)) {
 					cacheTimePaths.set(id, time);
 					return true;
 				}
@@ -255,10 +255,14 @@ class AssetsLibraryList extends AssetLibrary {
 	public function reset() {
 		unloadLibraries();
 
-		cacheLibraryTypePaths.clear();
-		cacheTimeTypePaths.clear();
+		for(source in [AssetSource.SOURCE, AssetSource.MODS, AssetSource.BOTH]) {
+			existsSpecificCacheLibrary[source]?.clear();
+			existsSpecificCacheTime[source]?.clear();
+		}
+		existsSpecificCacheLibrary.clear();
+		existsSpecificCacheTime.clear();
 
-		libraries = [];
+		libraries.resize(0);
 
 		// adds default libraries in again
 		for (d in __defaultLibraries) addLibrary(d);
