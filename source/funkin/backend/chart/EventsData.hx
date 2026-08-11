@@ -31,7 +31,9 @@ class EventsData {
 				type: TDropDown(['In', 'Out', 'InOut']),
 				defValue: "In",
 				saveIfDefault: false
-			}
+			},
+			{name: "Offset X", type: TFloat(null, null, 10, 3), defValue: 0},
+			{name: "Offset Y", type: TFloat(null, null, 10, 3), defValue: 0},
 		],
 		"Camera Position" => [
 			{name: "X", type: TFloat(null, null, 10, 3), defValue: 0},
@@ -66,7 +68,7 @@ class EventsData {
 			{name: "Tween Time (Steps)", type: TFloat(0.25, 9999, 0.25, 2), defValue: 4},
 			{
 				name: "Tween Ease (ex: circ, quad, cube)",
-				type: TDropDown(['linear', 'back', 'bounce', 'circ', 'cube', 'elastic', 'expo', 'quad', 'quart', 'quint', 'sine', 'smoothStep', 'smootherStep']),
+				type: TDropDown(['CLASSIC', 'linear', 'back', 'bounce', 'circ', 'cube', 'elastic', 'expo', 'quad', 'quart', 'quint', 'sine', 'smoothStep', 'smootherStep']),
 				defValue: "linear"
 			},
 			{
@@ -75,7 +77,7 @@ class EventsData {
 				defValue: "In"
 			},
 			{name: "Mode", type: TDropDown(['direct', 'stage']), defValue: "direct"},
-			{name: "Multiplicative?", type: TBool, defValue: true}
+			{name: "Multiplicative?", type: TBool, defValue: false}
 		],
 		"Camera Modulo Change" => [
 			{name: "Modulo Interval", type: TInt(1, 9999999, 1), defValue: 4},
